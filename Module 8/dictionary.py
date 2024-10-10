@@ -272,3 +272,5 @@ class IntroScene(Scene):
         self.play(Write(dictionary_title), Write(definitions))
         self.play(Write(dict_example), Create(key_box), Create(value_box), Create(key_label), Create(value_label))
         self.wait(2)
+
+        self.play(FadeOut(Group(*self.mobjects)))
