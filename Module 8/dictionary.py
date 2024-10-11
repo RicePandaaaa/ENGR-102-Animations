@@ -9,9 +9,9 @@ class DictionaryIndexing(Scene):
 
         # Step 2: Transform the dictionary into a vertical column of key-value pairs
         key_value_pairs = [
-            Text('"name": "tony"', font_size=36, color=WHITE),
-            Text('"likes": "books"', font_size=36, color=WHITE),
-            Text('"age": 21', font_size=36, color=WHITE),
+            VGroup(Text('"name"', font_size=36), Text(":", font_size=36), Text('"hoid"', font_size=36)).arrange(RIGHT, buff=0.5),
+            VGroup(Text('"likes"', font_size=36), Text(":", font_size=36), Text('"ramen"', font_size=36)).arrange(RIGHT, buff=0.5),
+            VGroup(Text('"instrument"', font_size=36), Text(":", font_size=36), Text('"flute"', font_size=36)).arrange(RIGHT, buff=0.5)
         ]
         key_value_column = VGroup(*key_value_pairs).arrange(DOWN, buff=0.5).move_to(RIGHT * 3)  # Right side column
 
@@ -19,47 +19,55 @@ class DictionaryIndexing(Scene):
         self.wait(1)
 
         # Step 3: Typing out "stats[]" on the left side for indexing
-        stats_index_text = Text("stats[]", font_size=36).move_to(LEFT * 3)
+        stats_index_text = Text("stats[]", font_size=36).move_to(LEFT * 3 + UP * 1)  # Shift it higher for better centering
         self.play(Write(stats_index_text))
         self.wait(0.5)
 
         # Step 4: Create the down arrow and position it below the index
-        arrow = Arrow(start=UP, end=DOWN, color=WHITE).next_to(stats_index_text, DOWN, buff=0.5)
+        arrow = Arrow(start=UP, end=DOWN, color=WHITE).next_to(stats_index_text, DOWN, buff=0.5)  # Center arrow
         self.play(Create(arrow))
 
-        # Function to highlight the corresponding key-value pair
-        def highlight_pair(pair):
-            highlight_box = SurroundingRectangle(pair, color=YELLOW, buff=0.2)
-            return highlight_box
-
-        # List of index strings and corresponding key-value pairs
-        indexes = ['"name"', '"likes"', '"age"']
-        values = ['"tony"', '"books"', '21']  # Corresponding values
+        # List of index strings
+        indexes = ['"name"', '"likes"', '"instrument"']
 
         for i, index in enumerate(indexes):
-            # Update the index inside the square brackets
-            new_index_text = Text(f"stats[{index}]", font_size=36).move_to(LEFT * 3)
-            highlight = highlight_pair(key_value_pairs[i])
+            # Backspace the existing index (fade out the old text)
+            self.play(FadeOut(stats_index_text), run_time=0.3)
 
-            # Display the value below the arrow
-            value_text = Text(values[i], font_size=36).next_to(arrow, DOWN, buff=0.5)
-
-            self.play(Transform(stats_index_text, new_index_text), Create(highlight))
-            self.play(Write(value_text))
+            # Type the new index as a chunk
+            stats_index_text = Text(f"stats[{index}]", font_size=36).move_to(LEFT * 3 + UP * 1)  # Re-center the text
+            self.play(FadeIn(stats_index_text), run_time=0.5)
             self.wait(1)
-            self.play(FadeOut(highlight), FadeOut(value_text))  # Remove the highlight and value for the next iteration
+
+            # Highlight the key and value
+            key, _, value = key_value_pairs[i]
+            key_box = SurroundingRectangle(key, color=BLUE, buff=0.2)
+            value_box = SurroundingRectangle(value, color=GREEN, buff=0.2)
+            self.play(Create(key_box))
+            self.wait(1)
+            self.play(Create(value_box))
+            self.wait(0.5)
+
+            # Copy the value text and animate it to move under the arrow
+            value_copy = value.copy().next_to(arrow, DOWN, buff=0.5)
+            self.play(Transform(value, value_copy))
+            self.wait(1)
+
+            # Fade out the highlights and reset value's position
+            self.play(FadeOut(key_box), FadeOut(value_box), FadeOut(value))
+            value.move_to(key_value_pairs[i][1])  # Reset the position of the value text
 
         # Step 5: Typing a random index that produces an error
-        random_index_text = Text('stats["random"]', font_size=36).move_to(LEFT * 3)
-        error_text = Text("Error", font_size=36, color=RED).next_to(arrow, DOWN, buff=0.5)
+        self.play(FadeOut(stats_index_text), run_time=0.3)
+        stats_index_text = Text('stats["random"]', font_size=36).move_to(LEFT * 3 + UP * 1)
+        self.play(FadeIn(stats_index_text), run_time=0.5)
 
-        # Show error message when indexing with a non-existent key
-        self.play(Transform(stats_index_text, random_index_text))
-        self.wait(1)
-        self.play(Write(error_text))
         self.wait(2)
 
-
+        # Show the error message when indexing with a non-existent key
+        error_text = Text("Error", font_size=36, color=RED).next_to(arrow, DOWN, buff=0.5)  # Centered "Error" message
+        self.play(Write(error_text))
+        self.wait(2)
 
 class DictionaryComparison(Scene):
     def construct(self):
