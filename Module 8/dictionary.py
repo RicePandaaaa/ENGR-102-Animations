@@ -120,6 +120,16 @@ class DictionaryComparison(Scene):
         # Step 3: Add a vertical line to separate the two halves
         divider = Line(start=UP * 3.5, end=DOWN * 3.5, color=WHITE)
         self.play(Create(divider))
+        self.wait(4)
+
+        self.play(definition_text.animate.scale(1.25), run_time=0.5)
+        self.play(definition_text.animate.scale(1 / 1.25), run_time=0.5)
+
+        self.wait(2)
+
+        # Enlarge and then shrink the word
+        self.play(word_text.animate.scale(1.25), run_time=0.5)
+        self.play(word_text.animate.scale(1 / 1.25), run_time=0.5)
 
         # Step 4: Duplicate the word and definition to move to the right side
         word_text_copy = word_text.copy()
@@ -153,10 +163,29 @@ class DictionaryComparison(Scene):
 
         # Animate the creation of the boxes and labels
         self.play(Create(key_box), Write(key_label), Create(value_box), Write(value_label))
-        self.wait(2)
+        self.wait(1.5)
 
+        self.play(value_box.animate.scale(1.25), 
+                  value_label.animate.scale(1.25), 
+                  value_text.animate.scale(1.25), run_time=0.5)
+
+        self.play(value_box.animate.scale(1 / 1.25), 
+                  value_label.animate.scale(1 / 1.25), 
+                  value_text.animate.scale(1 / 1.25), run_time=0.5)
+        
+        self.wait(1)
+        
+        self.play(key_box.animate.scale(1.25), 
+                  key_label.animate.scale(1.25), 
+                  key_text.animate.scale(1.25), run_time=0.5)
+
+        self.play(key_box.animate.scale(1 / 1.25), 
+                  key_label.animate.scale(1 / 1.25), 
+                  key_text.animate.scale(1 / 1.25), run_time=0.5)
         # Final pause to view the transition
         self.wait(2)
+
+        self.play(FadeOut(Group(*self.mobjects)))
 
 from manim import *
 
@@ -274,3 +303,4 @@ class IntroScene(Scene):
         self.wait(2)
 
         self.play(FadeOut(Group(*self.mobjects)))
+    
