@@ -1,82 +1,65 @@
 from manim import *
 
-class DictionaryVisualization(Scene):
+class DictionaryIndexing(Scene):
     def construct(self):
-        example_dict = {"name": "Tony", "age": 21, "year": "senior", "isGuy": True}
-        
-        # Group keys, values, and arrows for visual display
-        row_visuals = []
-        row_codes = []
+        # Step 1: Typing the dictionary onto the screen
+        dict_text = Text('stats = {"name": "hoid", "likes": "ramen", "instrument": "flute"}', font_size=36).to_edge(UP)
+        self.play(Write(dict_text, run_time=3))  # Type the dictionary quickly
+        self.wait(1)
 
-        # Create visuals for each key-value pair and their code equivalents
-        for key in example_dict:
-            # Create visual text for key-value pairs
-            key_text = Text(f"{repr(key)}", font_size=32)
-            value_text = Text(f"{repr(example_dict[key])}", font_size=32)
-            row_group = VGroup(key_text, Arrow(), value_text).arrange(RIGHT, buff=1)
-            row_visuals.append(row_group)
+        # Step 2: Transform the dictionary into a vertical column of key-value pairs
+        key_value_pairs = [
+            Text('"name": "tony"', font_size=36, color=WHITE),
+            Text('"likes": "books"', font_size=36, color=WHITE),
+            Text('"age": 21', font_size=36, color=WHITE),
+        ]
+        key_value_column = VGroup(*key_value_pairs).arrange(DOWN, buff=0.5).move_to(RIGHT * 3)  # Right side column
 
-            # Create separate key and value texts for the code line
-            key_code = Text(f'"{key}"', font_size=30, color=BLUE)
-            value_code = Text(f'{repr(example_dict[key])}', font_size=30, color=GREEN)
-            colon = Text(":", font_size=30)  # Colon and comma between key-value pairs
-            
-            # Position the key, colon, value, and comma correctly
-            row_code = VGroup(key_code, colon, value_code).arrange(RIGHT, buff=0.2)
-            row_codes.append(row_code)
+        self.play(Transform(dict_text, key_value_column))
+        self.wait(1)
 
-        # Arrange the visual key-value pairs vertically
-        dictionary_visual = VGroup(*row_visuals).arrange(DOWN, buff=0.8).move_to(ORIGIN)
-        
-        # Arrange the code text lines vertically (for transformation)
-        code_visual = VGroup(*row_codes).arrange(DOWN, buff=0.8).move_to(ORIGIN)
+        # Step 3: Typing out "stats[]" on the left side for indexing
+        stats_index_text = Text("stats[]", font_size=36).move_to(LEFT * 3)
+        self.play(Write(stats_index_text))
+        self.wait(0.5)
 
-        # Full dictionary as one line (for the final transformation)
-        full_code_dict = Text(f'{str(example_dict)}', font_size=30).move_to(ORIGIN)
+        # Step 4: Create the down arrow and position it below the index
+        arrow = Arrow(start=UP, end=DOWN, color=WHITE).next_to(stats_index_text, DOWN, buff=0.5)
+        self.play(Create(arrow))
 
-        # Step 1: Write each line of the dictionary visual representation one by one
-        for row in dictionary_visual:
-            self.play(Write(row))
-            self.wait(1)  # 1-second delay between each line
+        # Function to highlight the corresponding key-value pair
+        def highlight_pair(pair):
+            highlight_box = SurroundingRectangle(pair, color=YELLOW, buff=0.2)
+            return highlight_box
 
-        self.wait(1)  # Pause before transforming to code lines
+        # List of index strings and corresponding key-value pairs
+        indexes = ['"name"', '"likes"', '"age"']
+        values = ['"tony"', '"books"', '21']  # Corresponding values
 
-        # Step 2: Highlight and label the key and value for each transformation
-        for row_visual, row_code in zip(row_visuals, row_codes):
-            key_text, _, value_text = row_visual
+        for i, index in enumerate(indexes):
+            # Update the index inside the square brackets
+            new_index_text = Text(f"stats[{index}]", font_size=36).move_to(LEFT * 3)
+            highlight = highlight_pair(key_value_pairs[i])
 
-            # Highlight the key with reduced padding (tighter box)
-            key_highlight = SurroundingRectangle(key_text, color=BLUE, buff=0.05)  # Reduced buff for tight fit
-            key_label = Text("Key", font_size=20, color=BLUE).next_to(key_text, UP)
+            # Display the value below the arrow
+            value_text = Text(values[i], font_size=36).next_to(arrow, DOWN, buff=0.5)
 
-            # Highlight the value with reduced padding (tighter box)
-            value_highlight = SurroundingRectangle(value_text, color=GREEN, buff=0.05)  # Reduced buff for tight fit
-            value_label = Text("Value", font_size=20, color=GREEN).next_to(value_text, UP)
-
-            # Add highlights and labels
-            self.play(Create(key_highlight), Create(value_highlight), Write(key_label), Write(value_label))
+            self.play(Transform(stats_index_text, new_index_text), Create(highlight))
+            self.play(Write(value_text))
             self.wait(1)
+            self.play(FadeOut(highlight), FadeOut(value_text))  # Remove the highlight and value for the next iteration
+
+        # Step 5: Typing a random index that produces an error
+        random_index_text = Text('stats["random"]', font_size=36).move_to(LEFT * 3)
+        error_text = Text("Error", font_size=36, color=RED).next_to(arrow, DOWN, buff=0.5)
+
+        # Show error message when indexing with a non-existent key
+        self.play(Transform(stats_index_text, random_index_text))
+        self.wait(1)
+        self.play(Write(error_text))
+        self.wait(2)
 
 
-            # Move the highlights and labels to the new code positions
-            self.play(
-                ReplacementTransform(row_visual, row_code),
-                key_highlight.animate.move_to(row_code[0]),  # Move to the key in the code
-                key_label.animate.next_to(row_code[0], UP),
-                value_highlight.animate.move_to(row_code[2]),  # Move to the value in the code
-                value_label.animate.next_to(row_code[2], UP),
-            )
-
-            self.wait(1)
-
-            # Remove highlights and labels after transformation
-            self.play(FadeOut(key_highlight), FadeOut(value_highlight), FadeOut(key_label), FadeOut(value_label))
-
-        # Step 3: Fade out the code lines and replace them with the final centered dictionary
-        self.play(ReplacementTransform(code_visual, full_code_dict))  # Ensure previous code lines disappear
-        self.wait(2)  # Final pause to display the full dictionary
-
-from manim import *
 
 class DictionaryComparison(Scene):
     def construct(self):
