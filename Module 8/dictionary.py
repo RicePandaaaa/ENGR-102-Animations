@@ -355,4 +355,153 @@ class IntroScene(Scene):
         self.wait(2)
 
         self.play(FadeOut(Group(*self.mobjects)))
-    
+
+
+class KeysAndValuesAnimation(Scene):
+    def construct(self):
+        keys_function = Text("stats.keys()", font_size=48, color=BLUE).move_to(LEFT * 3)
+        values_function = Text("stats.values()", font_size=48, color=GREEN).move_to(RIGHT * 3)
+
+        self.play(Write(keys_function), Write(values_function))
+        self.wait(1)
+
+        self.play(keys_function.animate.scale(1.25), run_time=0.5)
+        self.play(keys_function.animate.scale(1 / 1.25), run_time=0.5)
+
+        self.play(values_function.animate.scale(1.25), run_time=0.5)
+        self.play(values_function.animate.scale(1 / 1.25), run_time=0.5)
+
+        self.play(FadeOut(keys_function), FadeOut(values_function))
+        self.wait(1)
+
+        dict_text = Text('stats = {"name": "hoid", "likes": "ramen", "instrument": "flute"}', font_size=36).to_edge(UP)
+        self.play(Write(dict_text))
+        self.wait(1)
+
+        keys_label = Text("stats.keys()", font_size=36, color=BLUE).move_to(LEFT * 5 + UP * 2)
+        values_label = Text("stats.values()", font_size=36, color=GREEN).move_to(LEFT + UP * 2)
+
+        self.play(Write(keys_label), Write(values_label))
+        self.wait(1)
+
+        key_value_pairs = [
+            VGroup(Text('"name"', font_size=36), Text(":", font_size=36), Text('"hoid"', font_size=36)).arrange(RIGHT),
+            VGroup(Text('"likes"', font_size=36), Text(":", font_size=36), Text('"ramen"', font_size=36)).arrange(RIGHT),
+            VGroup(Text('"instrument"', font_size=36), Text(":", font_size=36), Text('"flute"', font_size=36)).arrange(RIGHT)
+        ]
+
+        key_value_column = VGroup(*key_value_pairs).arrange(DOWN, buff=0.5).move_to(RIGHT * 4)
+        self.play(FadeIn(key_value_column))
+        self.wait(1)
+
+        for i, pair in enumerate(key_value_pairs):
+            key, _, value = pair
+
+            key_box = SurroundingRectangle(key, color=BLUE, buff=0.1)
+            value_box = SurroundingRectangle(value, color=GREEN, buff=0.1)
+
+            self.play(Create(key_box), Create(value_box))
+            self.wait(0.5)
+
+            key_copy = key.copy().move_to(keys_label.get_center() + DOWN * (i + 1))
+            value_copy = value.copy().move_to(values_label.get_center() + DOWN * (i + 1))
+
+            self.play(TransformFromCopy(key, key_copy), TransformFromCopy(value, value_copy))
+            self.wait(0.5)
+
+            self.play(FadeOut(key_box), FadeOut(value_box))
+
+        self.wait(2)
+
+        self.play(FadeOut(Group(*self.mobjects)))
+        self.wait(1)
+
+        keys_function = Text("stats.keys()", font_size=48, color=BLUE).move_to(LEFT * 3 + UP * 1.5)
+        values_function = Text("stats.values()", font_size=48, color=GREEN).move_to(RIGHT * 3 + UP * 1.5)
+
+        self.play(FadeIn(keys_function), FadeIn(values_function))
+        self.wait(1)
+
+        arrow_keys = Arrow(start=UP, end=DOWN, color=WHITE).next_to(keys_function, DOWN)
+        arrow_values = Arrow(start=UP, end=DOWN, color=WHITE).next_to(values_function, DOWN)
+        self.play(Create(arrow_keys), Create(arrow_values))
+        self.wait(0.5)
+
+        list_text_keys = Text("list", font_size=36, color=WHITE).next_to(arrow_keys, DOWN)
+        list_text_values = Text("list", font_size=36, color=WHITE).next_to(arrow_values, DOWN)
+        self.play(FadeIn(list_text_keys), FadeIn(list_text_values))
+
+        strike_through_keys = Line(start=list_text_keys.get_left(), end=list_text_keys.get_right(), color=RED, stroke_width=4)
+        strike_through_values = Line(start=list_text_values.get_left(), end=list_text_values.get_right(), color=RED, stroke_width=4)
+
+        self.play(Create(strike_through_keys), Create(strike_through_values))
+        self.wait(2)
+
+        iterator_text_keys = Text("view object", font_size=36, color=WHITE).next_to(arrow_keys, DOWN)
+        iterator_text_values = Text("view object", font_size=36, color=WHITE).next_to(arrow_values, DOWN)
+        note_top = Text("*You can iterate through a view object like a list,", font_size=36, color=RED).shift(DOWN * 2.5)
+        note_bot = Text("but you cannot use any of the list functions!", font_size=36, color=RED).next_to(note_top, DOWN)
+        self.play(ReplacementTransform(list_text_keys, iterator_text_keys),
+                  ReplacementTransform(list_text_values, iterator_text_values),
+                  FadeOut(strike_through_keys), FadeOut(strike_through_values), FadeIn(note_top), FadeIn(note_bot))
+        self.wait(5)
+
+        list_keys_function = Text("list(stats.keys())", font_size=48, color=BLUE).move_to(LEFT * 3 + UP)
+        list_values_function = Text("list(stats.values())", font_size=48, color=GREEN).move_to(RIGHT * 3 + UP)
+
+        list_text_keys = Text("list", font_size=36, color=WHITE).next_to(arrow_keys, DOWN)
+        list_text_values = Text("list", font_size=36, color=WHITE).next_to(arrow_values, DOWN)
+
+        self.play(ReplacementTransform(keys_function, list_keys_function), 
+                  ReplacementTransform(values_function, list_values_function),
+                  ReplacementTransform(iterator_text_keys, list_text_keys),
+                  ReplacementTransform(iterator_text_values, list_text_values),
+                  FadeOut(note_top), FadeOut(note_bot))
+        self.wait(2)
+
+        self.play(FadeOut(Group(*self.mobjects)))
+        self.wait(2)
+
+class TitleAnimation(Scene):
+    def construct(self):
+        # Step 1: Display the title and subheader
+        title = Text("Dictionaries", font_size=64)
+        subtitle = Text("& Top Down Design", font_size=48).next_to(title, DOWN)
+        course_info = Text("ENGR 102 - Fall 2024", font_size=36).next_to(subtitle, DOWN)
+
+        # Center the text and display
+        title_group = VGroup(title, subtitle, course_info).arrange(DOWN, buff=0.5).move_to(ORIGIN)
+        self.play(Write(title_group))
+        self.wait(10)
+
+        # Step 2: Fade out the title group
+        self.play(FadeOut(title_group))
+        self.wait(1)
+
+        # Step 3: Fade in the table of contents
+        table_of_contents = [
+            Text("1. Why we use dictionaries", font_size=30),
+            Text("2. What they look like", font_size=30),
+            Text("3. Indexing a dictionary", font_size=30),
+            Text("4. Looping through a dictionary", font_size=30),
+            Text("5. keys() and values()", font_size=30),
+            Text("6. What is top down design", font_size=30),
+            Text("7. Practice Problem: Average Grade", font_size=30),
+        ]
+
+        # Step 4: Slowly write each content line by line
+        previous_line = None
+        for line in table_of_contents:
+            current_line = line.to_edge(UP).shift(LEFT * 0.75 + DOWN)
+            if previous_line is not None:
+                current_line = line.next_to(previous_line, DOWN).align_to(previous_line, LEFT)
+
+            self.play(FadeIn(current_line))
+            previous_line = current_line.copy()
+
+            self.wait(1)
+
+        self.play(FadeOut(Group(*self.mobjects)))
+        self.wait(2)
+
+
